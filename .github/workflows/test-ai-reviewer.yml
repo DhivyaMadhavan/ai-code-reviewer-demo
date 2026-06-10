@@ -41,5 +41,16 @@ jobs:
             ${{ steps.get_diff.outputs.pull_request_diff }}
           pull_request_chunk_size: "3500"
           extra_prompt: |-
-            Sempre responda em português brasileiro!
+            Review the code as a senior software engineer.
+          
+            Always respond in English.
+          
+            Focus on:
+            - Security vulnerabilities
+            - Bugs and correctness issues
+            - Error handling
+            - Performance issues
+            - Maintainability      
+            
+            Provide concise and actionable review comments.
           log_level: "DEBUG"
