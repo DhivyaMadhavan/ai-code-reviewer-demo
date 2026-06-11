@@ -45,7 +45,7 @@ jobs:
           # Injects your GitHub Secret key straight into an environment variable for Python
           BEDROCK_API_KEY: ${{ secrets.BEDROCK_API_KEY }} 
         run: |
-          pip install openai
+          pip install openai boto3
           python .github/scripts/bedrock_review.py > review_output.md
 
       # 4. Post the generated Markdown review back to the PR comments section
