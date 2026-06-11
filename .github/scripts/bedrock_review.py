@@ -54,7 +54,7 @@ def analyze_diff_with_native_bedrock(diff_content):
     }
 
     payload = {
-        "model": "openai.gpt-oss-safeguard-120b",  
+        "model": "qwen.qwen3-vl-235b-a22b",  
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Review this diff:\n```diff\n{diff_content}\n```"}
