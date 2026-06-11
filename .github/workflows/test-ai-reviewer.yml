@@ -1,4 +1,4 @@
-name: "Code Review by Gemini AI"
+name: "Code Review by Amazon Bedrock"
 
 on:
   pull_request:
@@ -7,10 +7,14 @@ jobs:
   review:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write      # Required for secure AWS OIDC login
       contents: read
-      pull-requests: write
+      pull-requests: write # Allows writing comments on the PR
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 1. Get the difference inside the YAML file itself (Your exact logic)
       - name: "Get diff of the pull request"
         id: get_diff
         shell: bash
@@ -27,30 +31,43 @@ jobs:
             cat "diff.txt";
             echo 'EOF';
           } >> $GITHUB_OUTPUT
-      - uses: rubensflinco/gemini-code-review-action@1.0.5
-        name: "Code Review by Gemini AI"
-        id: review
+
+      # 2. Authenticate securely with AWS using OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_repository: ${{ github.repository }}
-          github_pull_request_number: ${{ github.event.pull_request.number }}
-          git_commit_hash: ${{ github.event.pull_request.head.sha }}
-          model: "gemini-2.5-flash"
-          pull_request_diff: |-
-            ${{ steps.get_diff.outputs.pull_request_diff }}
-          pull_request_chunk_size: "3500"
-          extra_prompt: |-
-            Review the code as a senior software engineer.
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubBedrockReviewerRole # Replace with your AWS IAM Role ARN
+          aws-region: us-east-1
+
+      # 3. Set up Python Environment on the runner
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 4. Run the decoupled Python script and save its terminal output
+      - name: "Run Bedrock Review Script"
+        id: run_review
+        env:
+          PR_DIFF: ${{ steps.get_diff.outputs.pull_request_diff }}
+        run: |
+          pip install boto3
           
-            Always respond in English.
-          
-            Focus on:
-            - Security vulnerabilities
-            - Bugs and correctness issues
-            - Error handling
-            - Performance issues
-            - Maintainability      
+          # Run the script and write its raw output to a local Markdown file
+          python .github/scripts/bedrock_review.py > review_output.md
+
+      # 5. Post the generated Markdown review back to the PR comments section
+      - name: "Post Comment to PR"
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const reviewMarkdown = fs.readFileSync('review_output.md', 'utf8');
             
-            Provide concise and actionable review comments.
-          log_level: "DEBUG"
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "### 🤖 Amazon Bedrock Automated Code Review\n\n" + reviewMarkdown
+            });
