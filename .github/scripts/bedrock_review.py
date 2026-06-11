@@ -24,10 +24,7 @@ def analyze_diff_with_native_bedrock(diff_content):
         * **Fix:** A one-sentence solution followed by a compliant code snippet showing how to write it correctly:
         ```[language]
         // Show the secure, fixed code snippet here
-        ```
-        
-        
-
+        ```      
         """  
 
     headers = {
