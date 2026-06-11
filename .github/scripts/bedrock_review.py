@@ -8,7 +8,7 @@ PR_DIFF_CONTENT = os.getenv("PR_DIFF")
 # 2. Configure target Model, Base URL, and the injected secret key
 MODEL_ID = "openai.gpt-oss-safeguard-120b" 
 CUSTOM_BASE_URL = "https://bedrock-runtime.ap-south-1.amazonaws.com/openai/v1"
-SECRET_KEY = os.getenv("BEDROCK_SECRET_KEY")
+SECRET_KEY = os.getenv("BEDROCK_API_KEY")
 
 def analyze_diff_with_openai_sdk(diff_content):
     """Sends the pre-extracted git diff to the Bedrock OpenAI gateway."""
