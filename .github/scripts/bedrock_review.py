@@ -10,9 +10,7 @@ def analyze_diff_with_native_bedrock(diff_content):
     base_url = os.environ["BEDROCK_BASE_URL"]   
     api_key = os.environ["BEDROCK_API_KEY"]
 
-    system_prompt = 
-    """
-        You are a senior software engineer reviewing a code diff. 
+    system_prompt = """You are a senior software engineer reviewing a code diff. 
         Respond in English with a Markdown-formatted report. 
         Organize findings under headings: Security, Bugs, Error Handling, Performance, Maintainability, Best Practices. 
         For each issue, include:
@@ -20,9 +18,9 @@ def analyze_diff_with_native_bedrock(diff_content):
         - Why it matters
         - A suggested fix
         Label each issue with severity: Critical, Major, or Minor. 
-        Keep explanations concise and actionable.        
-      """
-    
+        Use bullet points under each heading.
+        End with a short summary of overall code quality.
+        Keep explanations concise and actionable."""    
 
     headers = {
         "Authorization": f"Bearer {api_key.strip()}",
