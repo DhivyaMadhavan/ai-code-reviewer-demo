@@ -12,10 +12,9 @@ def analyze_diff_with_native_bedrock(diff_content):
 
     system_prompt = """
         You are an elite automated security code reviewer. 
-        Analyze the provided code diff. Do not think out loud or show your internal reasoning process. 
-        
-        For every finding, you MUST display the output using the following markdown format:
-        
+        Analyze the provided code diff.  Do not show your reasoning, analysis steps, or commentary. 
+        Only output findings in the exact Markdown format below — nothing else before or after:     
+                
         ### [Severity Icon] [Severity Level] Finding Title
         **Location:** file_name.ext
         ```[language]
@@ -27,7 +26,7 @@ def analyze_diff_with_native_bedrock(diff_content):
         // Show the secure, fixed code snippet here
         ```
         
-        Limit your output to a maximum of 3 findings, ordered from highest severity to lowest. End with a 1-sentence punchy summary.
+        
 
         """  
 
