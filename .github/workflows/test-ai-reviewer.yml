@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # Allows writing comments on the PR
+      pull-requests: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 1. Get the difference inside the YAML file itself
+      # 1. Get the diff of the pull request
       - name: "Get diff of the pull request"
         id: get_diff
         shell: bash
@@ -31,24 +31,24 @@ jobs:
             echo 'EOF';
           } >> $GITHUB_OUTPUT
 
-      # 2. Set up Python Environment on the runner
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Run Python script using your Bedrock Secret Key
+      # 3. Run Bedrock Review Script
       - name: "Run Bedrock Review Script"
         id: run_review
         env:
           PR_DIFF: ${{ steps.get_diff.outputs.pull_request_diff }}
-          # Injects your GitHub Secret key straight into an environment variable for Python
-          BEDROCK_API_KEY: ${{ secrets.BEDROCK_API_KEY }} 
+          BEDROCK_API_KEY: ${{ secrets.BEDROCK_API_KEY }}
+          BEDROCK_BASE_URL: ${{ secrets.BEDROCK_BASE_URL }}
         run: |
-          pip install openai boto3
+          pip install requests
           python .github/scripts/bedrock_review.py > review_output.md
 
-      # 4. Post the generated Markdown review back to the PR comments section
+      # 4. Post the generated Markdown review back to the PR
       - name: "Post Comment to PR"
         uses: actions/github-script@v7
         with:
@@ -56,7 +56,6 @@ jobs:
           script: |
             const fs = require('fs');
             const reviewMarkdown = fs.readFileSync('review_output.md', 'utf8');
-            
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
