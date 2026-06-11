@@ -7,8 +7,8 @@ PR_DIFF_CONTENT = os.getenv("PR_DIFF")
 def analyze_diff_with_native_bedrock(diff_content):
     print("Invoking Bedrock Runtime endpoint via HTTPS...")
 
-    base_url = os.environ["BEDROCK_BASE_URL"]   # e.g. https://bedrock-runtime.YOUR_REGION.amazonaws.com/model/amazon.nova-pro-v1:0/invoke
-    api_key = os.environ["BEDROCK_API_KEY"]     # stored in GitHub Secrets
+    base_url = os.environ["BEDROCK_BASE_URL"]
+    api_key = os.environ["BEDROCK_API_KEY"]
 
     system_prompt = (
         "Review the code as a senior software engineer. Always respond in English. "
@@ -16,7 +16,7 @@ def analyze_diff_with_native_bedrock(diff_content):
     )
 
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {api_key.strip()}",
         "Content-Type": "application/json"
     }
 
@@ -29,11 +29,9 @@ def analyze_diff_with_native_bedrock(diff_content):
         resp = requests.post(base_url, headers=headers, json=payload)
         resp.raise_for_status()
         data = resp.json()
-
-        # Adjust depending on the Bedrock model’s response format
+        print(data)  # For debugging, remove once you know the schema
         review_text = data.get("outputText", "No review generated.")
         print(review_text)
-
     except Exception as e:
         print(f"Native HTTPS Invocation Error: {e}", file=sys.stderr)
         sys.exit(1)
