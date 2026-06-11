@@ -10,10 +10,19 @@ def analyze_diff_with_native_bedrock(diff_content):
     base_url = os.environ["BEDROCK_BASE_URL"]   
     api_key = os.environ["BEDROCK_API_KEY"]
 
-    system_prompt = (
-        "Review the code as a senior software engineer. Always respond in English. "
-        "Focus on: Security vulnerabilities, Bugs, Error handling, Performance, and Maintainability."
-    )
+    system_prompt = 
+    """
+        You are a senior software engineer reviewing a code diff. 
+        Respond in English with a Markdown-formatted report. 
+        Organize findings under headings: Security, Bugs, Error Handling, Performance, Maintainability, Best Practices. 
+        For each issue, include:
+        - A short description of the problem
+        - Why it matters
+        - A suggested fix
+        Label each issue with severity: Critical, Major, or Minor. 
+        Keep explanations concise and actionable.        
+      """
+    
 
     headers = {
         "Authorization": f"Bearer {api_key.strip()}",
@@ -31,8 +40,7 @@ def analyze_diff_with_native_bedrock(diff_content):
     try:
         resp = requests.post(f"{base_url}/chat/completions", headers=headers, json=payload)
         resp.raise_for_status()
-        data = resp.json()
-        print(data)  
+        data = resp.json()         
         
         # Extract the text depending on schema
         if "choices" in data and len(data["choices"]) > 0:
