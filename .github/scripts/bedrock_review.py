@@ -5,9 +5,9 @@ import requests
 PR_DIFF_CONTENT = os.getenv("PR_DIFF")
 
 def analyze_diff_with_native_bedrock(diff_content):
-    print("Invoking Bedrock Runtime endpoint via HTTPS...")
+    print("Invoking Bedrock Runtime endpoint via HTTPS (OpenAI-compatible)...")
 
-    base_url = os.environ["BEDROCK_BASE_URL"]
+    base_url = os.environ["BEDROCK_BASE_URL"]   
     api_key = os.environ["BEDROCK_API_KEY"]
 
     system_prompt = (
@@ -21,17 +21,27 @@ def analyze_diff_with_native_bedrock(diff_content):
     }
 
     payload = {
-        "modelId": "openai.gpt-oss-safeguard-120b",
-        "inputText": f"{system_prompt}\n\nReview this diff:\n```diff\n{diff_content}\n```"
+        "model": "openai.gpt-oss-safeguard-120b",  
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Review this diff:\n```diff\n{diff_content}\n```"}
+        ]
     }
 
     try:
-        resp = requests.post(base_url, headers=headers, json=payload)
+        resp = requests.post(f"{base_url}/chat/completions", headers=headers, json=payload)
         resp.raise_for_status()
         data = resp.json()
-        print(data)  # For debugging, remove once you know the schema
-        review_text = data.get("outputText", "No review generated.")
+        print(data)  
+        
+        # Extract the text depending on schema
+        if "choices" in data and len(data["choices"]) > 0:
+            review_text = data["choices"][0]["message"]["content"]
+        else:
+            review_text = "No review generated."
+
         print(review_text)
+
     except Exception as e:
         print(f"Native HTTPS Invocation Error: {e}", file=sys.stderr)
         sys.exit(1)
