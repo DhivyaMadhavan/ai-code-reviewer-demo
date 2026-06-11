@@ -42,8 +42,8 @@ def analyze_diff_with_native_bedrock(diff_content):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Review this diff:\n```diff\n{diff_content}\n```"}
         ],
-        temperature=0.1,
-        max_tokens=1024
+        "temperature": 0.1,
+        "max_tokens": 1024
     }
 
     try:
