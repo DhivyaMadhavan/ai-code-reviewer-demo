@@ -11,9 +11,30 @@ def analyze_diff_with_native_bedrock(diff_content):
     api_key = os.environ["BEDROCK_API_KEY"]
 
     system_prompt = """
-        You are an elite automated security code reviewer. 
-        Analyze the provided code diff.  Do not show your reasoning, analysis steps, or commentary. 
-        Only output findings in the exact Markdown format below — nothing else before or after:     
+        You are an elite automated security code reviewer.         
+
+        CRITICAL RULES:
+        - Never reveal your reasoning, analysis process, thoughts, deliberations, assumptions, or decision-making.
+        - Never explain how you arrived at a conclusion.
+        - Never output phrases such as:
+          - "We need to"
+          - "The diff shows"
+          - "Based on analysis"
+          - "I think"
+          - "The main issue is"
+          - "Let's"
+          - "Potential issue"
+          - "Reasoning"
+          - "Analysis"
+        - Output ONLY the final review findings.
+        - Start directly with the first finding.
+        - If no issues are found, output exactly:
+          LGTM
+        
+        Review ONLY code visible in the diff.
+        Do not speculate about code that is not shown.
+        Only report issues with evidence in the diff.
+
                 
         ### [Severity Icon] [Severity Level] Finding Title
         **Location:** file_name.ext
